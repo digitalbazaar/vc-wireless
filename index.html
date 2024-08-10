@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Verifiable Credentials Over Wireless Protocols</title>
+    <meta http-equiv='Content-Type' content='text/html;charset=utf-8'/>
+    <!--
+      === NOTA BENE ===
+      For the three scripts below, if your spec resides on dev.w3 you can check them
+      out in the same tree and use relative links so that they'll work offline,
+     -->
+    <script src='https://www.w3.org/Tools/respec/respec-w3c' class='remove'></script>
+    <script src="./common.js" class="remove"></script>
+    <script class="remove"
+      src="https://cdn.jsdelivr.net/gh/digitalbazaar/respec-vc@3.3.4/dist/main.js"></script>
+
+    <script class="remove">
+      var respecConfig = {
+        //group: "credentials",
+
+        // specification status (for example, WD, LCWD, NOTE, etc.). If in doubt use ED.
+        specStatus: "unofficial",
+
+        // the specification's short name, as in http://www.w3.org/TR/short-name/
+        shortName: "vc-wireless-1.0",
+
+        // subtitle for the spec
+        subtitle: "Wireless transmission of VCs over NFC and Bluetooth",
+
+        // if you wish the publication date to be other than today, set this
+        //publishDate: "2024-01-23",
+        //crEnd: "2024-03-23",
+        //prEnd: "2019-10-01",
+        //implementationReportURI: "https://w3c.github.io/vc-data-model-2.0-test-suite/",
+        //errata: "https://w3c.github.io/vc-data-model/errata.html",
+        //previousMaturity: "REC",
+        //previousPublishDate: "2022-03-03",
+
+        // if there is a previously published draft, uncomment this and set its YYYY-MM-DD date
+        // and its maturity status
+        // previousPublishDate:  "1977-03-15",
+        // previousMaturity:  "WD",
+
+        // extend the bibliography entries
+        localBiblio: {
+          "CBOR-LD": {
+            title: "CBOR for Linked Data",
+            authors: ["Dave Longley", "Manu Sporny", "Wesley Smith"],
+            date: "July 15 2024",
+            publisher: "JSON-LD Community Group",
+            href: "https://json-ld.github.io/cbor-ld-spec/"
+          }
+        },
+        doJsonLd: true,
+
+        // Uncomment these to use the respec extension that generates a list of
+        //   normative statements:
+        preProcess: [/*prepare_reqlist*/],
+        postProcess: [
+          window.respecVc.createVcExamples
+          /*add_reqlist_button*/
+        ],
+
+        github: "https://github.com/digitalbazaar/vc-wireless/",
+        includePermalinks: false,
+
+        // if there a publicly available Editor's Draft, this is the link
+        edDraftURI: "https://w3c.github.io/vc-data-model/",
+
+        // if this is a LCWD, uncomment and set the end of its review period
+        // lcEnd: "2009-08-05",
+
+        // editors, add as many as you like
+        // only "name" is required
+        editors: [
+          { name: "Manu Sporny", url: "https://www.linkedin.com/in/manusporny/",
+            company: "Digital Bazaar", companyURL: "https://digitalbazaar.com/",
+            w3cid: 41758},
+          { name: "Dave Longley", url: "https://github.com/dlongley",
+            company: "Digital Bazaar", companyURL: "https://digitalbazaar.com/",
+            w3cid: 48025},
+        ],
+        formerEditors: [
+        ],
+        // authors, add as many as you like.
+        // This is optional, uncomment if you have authors as well as editors.
+        // only "name" is required. Same format as editors.
+        authors:
+        [
+          { name: "Dave Longley", url: "https://digitalbazaar.com/",
+            company: "Digital Bazaar", companyURL: "https://digitalbazaar.com/",
+            w3cid: 48025
+          },
+          { name: "Manu Sporny", url: "https://digitalbazaar.com/",
+            company: "Digital Bazaar", companyURL: "https://digitalbazaar.com/",
+            w3cid: 41758
+          }
+        ],
+        xref: ["URL", "I18N-GLOSSARY", "INFRA", "VC-DATA-MODEL-2.0"],
+        lint: { "informative-dfn": false },
+        maxTocLevel: 3,
+        inlineCSS: true
+      };
+    </script>
+    <style>
+code {
+  color: rgb(199, 73, 0);
+  font-weight: bold;
+}
+pre {
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+pre .highlight {
+  font-weight: bold;
+  color: Green;
+}
+pre .subject {
+  font-weight: bold;
+  color: RoyalBlue;
+}
+pre .property {
+  font-weight: bold;
+  color: DarkGoldenrod;
+}
+pre .comment {
+  font-weight: bold;
+  color: SteelBlue;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+ol.algorithm {
+  counter-reset: numsection;
+  list-style-type: none;
+}
+ol.algorithm li {
+  margin: 0.5em 0;
+}
+ol.algorithm li:before {
+  font-weight: bold;
+  counter-increment: numsection;
+  content: counters(numsection, ".") ") ";
+}
+
+table.simple {
+    border-collapse: collapse;
+    margin: 25px 0;
+    min-width: 400px;
+    border: 1px solid #dddddd;
+}
+table.simple thead tr {
+    background-color: #005a9c;
+    color: #ffffff;
+    text-align: left;
+}
+table.simple th,
+table.simple td {
+    padding: 12px 15px;
+    vertical-align: top;
+    text-align: left;
+}
+table.simple tbody tr {
+    border-bottom: 1px solid #dddddd;
+}
+table.simple tbody tr:nth-of-type(even) {
+    background-color: #00000008;
+}
+table.simple tbody tr:last-of-type {
+    border-bottom: 2px solid #005a9c;
+}
+    </style>
+  </head>
+  <body>
+    <section id='abstract'>
+      <p>
+[=Credentials=] are integral to our daily lives; driver's licenses confirm our
+capability to operate motor vehicles, university degrees assert our level of
+education, and government-issued passports permit travel between countries. The
+[[[?VC-DATA-MODEL-2.0]]] specification provides a mechanism to express these
+sorts of [=credentials=] on the Web in cryptographically secure,
+privacy-respecting, and machine-verifiable way. At times it is useful to be able
+to transmit these sorts of credentials in a peer-to-peer setting where wide area
+network connectivity is not available. This specification establishes a number
+of wireless protocols that can be used to request and present verifiable
+credentials over electromagnetic communication devices such ones supporting Near
+Field Communication (NFC) and Bluetooth Low Energy (BLE).
+      </p>
+    </section>
+
+    <section id='sotd'>
+      <p>
+This specification is EXPERIMENTAL and is NOT INTENDED for production
+deployment.
+      </p>
+
+      <p>
+Comments regarding this specification are welcome at any time.
+Please file issues directly on
+<a href="https://github.com/digitalbazaar/vc-wireless/issues/">GitHub</a>,
+or send them to
+<a href="mailto:public-credentials@w3.org">public-credentials@w3.org</a>
+if that is not possible.
+(<a href="mailto:public-credentials-request@w3.org?subject=subscribe">subscribe</a>,
+<a href="https://lists.w3.org/Archives/Public/public-credentials/">archives</a>).
+      </p>
+
+    </section>
+
+    <section class="informative">
+      <h2>Introduction</h2>
+
+      <p>
+[=Credentials=] are integral to our daily lives; driver's licenses confirm our
+capability to operate motor vehicles, university degrees assert our level of
+education, and government-issued passports permit travel between countries. The
+[[[?VC-DATA-MODEL-2.0]]] specification provides a mechanism to express these
+sorts of [=credentials=] on the Web in cryptographically secure,
+privacy-respecting, and machine-verifiable way. At times it is useful to be able
+to transmit these sorts of credentials in a peer-to-peer setting where wide area
+network connectivity is not available. This specification establishes a number
+of wireless protocols that can be used to request and present verifiable
+credentials over electromagnetic communication devices such ones supporting Near
+Field Communication (NFC) and Bluetooth Low Energy (BLE).
+      </p>
+
+      <section id="conformance" class="normative">
+        <p class="issue" title="Conformance classes to be determined">
+The conformance classes for this specification will be specified at a future
+date.
+        </p>
+        <p>
+This document also contains examples that contain characters that are invalid
+JSON, such as inline comments (`//`) and the use of ellipsis
+(`...`) to denote information that adds little value to the example.
+Implementers are cautioned to remove this content if they desire to use the
+information as a valid document.
+        </p>
+
+        <p class="note" title="Human-readable texts in English are illustrative">
+Examples provided throughout this document include descriptive properties, such
+as `name` and `description`, with values in English to simplify the concepts in
+each example of the specification. These examples do not necessarily reflect the
+data structures needed for international use, described in more detail in
+the
+<a href="https://www.w3.org/TR/vc-data-model-2.0#internationalization-considerations">
+Internationalization Considerations section in the Verifiable Credentials
+specification</a>.
+        </p>
+
+      </section>
+
+    </section>
+
+    <section class="normative">
+      <h2>Terminology</h2>
+
+      <p>
+The following terms are used to describe concepts in this specification.
+      </p>
+
+      <dl class="termlist definitions">
+        <dt><dfn class="export">NFC Host</dfn></dt>
+        <dd>
+An assertion made about a [=subject=].
+        </dd>
+    </section>
+
+    <section class="informative">
+      <h2>Use Cases</h2>
+
+      <section>
+        <h3>Non-Interactive Presentation</h3>
+
+        <p>
+
+        </p>
+      </section>
+
+      <section>
+        <h3>Interactive Presentation</h3>
+
+        <p>
+
+        </p>
+      </section>
+
+      <section>
+        <h3>Wireless Protocol Upgrade</h3>
+
+        <p>
+
+        </p>
+      </section>
+
+      <section>
+        <h3>Optical Initiation</h3>
+
+        <p>
+
+        </p>
+      </section>
+
+    </section>
+
+    <section class="informative">
+      <h2>NFC Protocol</h2>
+
+      <p>
+      </p>
+    </section>
+
+    <section class="informative">
+      <h2>Bluetooth Protocol</h2>
+
+      <p>
+      </p>
+    </section>
+
+    <section class="informative">
+      <h2>Security Considerations</h2>
+
+      <p class="advisement">
+Before reading this section, readers are urged to familiarize themselves
+with general security advice provided in the
+<a href="https://www.w3.org/TR/vc-data-model-2.0/#security-considerations">
+Security Considerations section of the Verifiable Credential Data Model
+specification</a> and the
+<a href="https://www.w3.org/TR/vc-data-integrity/#security-considerations">
+Security Considerations section of the Data Integrity specification</a>.
+      </p>
+    </section>
+
+    <section class="informative">
+      <h2>Privacy Considerations</h2>
+
+      <p class="advisement">
+Before reading this section, readers are urged to familiarize themselves
+with general privacy advice provided in the
+<a href="https://www.w3.org/TR/vc-data-model-2.0/#privacy-considerations">
+Privacy Considerations section of the Verifiable Credential Data Model
+specification</a> and the
+<a href="https://www.w3.org/TR/vc-data-integrity/#privacy-considerations">
+Privacy Considerations section of the Data Integrity specification</a>.
+      </p>
+    </section>
+
+    <section class="appendix informative">
+      <h2>Acknowledgements</h2>
+
+      <p>
+The Working Group thanks the following individuals ...
+      </p>
+
+      <p>
+Work on this specification has been supported by ...
+      </p>
+
+      <p>
+Portions of the work on this specification have been funded by ...
+      </p>
+
+      <p>
+The Working Group would like to thank the following individuals for reviewing
+and providing feedback on the specification (in alphabetical order): ...
+      </p>
+
+    </section>
+  </body>
+</html>
