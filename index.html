@@ -304,6 +304,71 @@ An assertion made about a [=subject=].
     </section>
 
     <section class="informative">
+      <h2>Interaction Offers</h2>
+
+      <p>
+An <dfn class="external lint-ignore">interaction offer</dfn> is a protocol that
+peers use to determine the protocols over which an interaction can occur.
+The protocol is composed of one peer providing an
+<dfn class="external">interaction offer URL</dfn> while the other peer fetches
+the <dfn class="external">interaction offer response</dfn>.
+An example of the [=interaction offer URL=] is provided below:
+      </p>
+
+      <pre class="example" title="A simple interaction offer URL">
+https://interaction.example/interactions/123/request
+      </pre>
+
+      <p>
+The URL consists of the following query parameters:
+      </p>
+
+      <dl>
+        <dt>nfc</dt>
+        <dd>
+An OPTIONAL parameter that, if present, specifies that further communication
+can occur over NFC.
+        </dd>
+        <dt>bt</dt>
+        <dd>
+An OPTIONAL parameter that, if present, specifies Bluetooth connection details
+such as address and access credentials. An example of such a URL is:
+`btspp://00:11:22:33:FF:EE:97c44c80-5fcc-11ef-81a2-bf5f90ac9110;vcapi`
+        </dd>
+        <dt>wifi</dt>
+        <dd>
+An OPTIONAL parameter that, if present, specifies WiFi connection details
+such as an access point address and access credentials. An example of such a
+URL is: `WIFI:S:38f2bcc5a0b71;T:WPA;P:J3Klq9c2KlPPcJkwzU02K;;vcapi`
+        </dd>
+      </dl>
+
+      <p>
+When a request is made to the [=interaction offer URL=] URL, an
+[=interaction offer response=] is provided. An example of an interaction offer
+response is provided below:
+      </p>
+
+      <pre class="example" title="An interaction offer response">
+{
+  <span class="comment">// these are protocols that can be used</span>
+  "protocols": {
+    "website": "https://website.example/interaction/123",
+    "vcapi": [
+      "nfc",
+      "btspp://00:11:22:33:FF:EE:97c44c80-5fcc-11ef-81a2-bf5f90ac9110",
+      "WIFI:S:38f2bcc5a0b71;T:WPA;P:J3Klq9c2KlPPcJkwzU02K;;",
+      "https://vcapi.example/workflows/z1A1FjMfnG/exchanges/z19mxakBFecZ",
+    ],
+    "otherRetailApi": "https://retail.example/checkout_api/763DAKX7diL5BFecZ"
+  }
+}
+      </pre>
+
+    </section>
+
+
+    <section class="informative">
       <h2>NFC Protocol</h2>
 
       <p>
