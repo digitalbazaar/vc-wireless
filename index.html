@@ -95,7 +95,7 @@
             w3cid: 41758
           }
         ],
-        xref: ["URL", "I18N-GLOSSARY", "INFRA", "VC-DATA-MODEL-2.0"],
+        xref: ["URL", "I18N-GLOSSARY", "INFRA", "VC-DATA-MODEL-2.0", "WEB-NFC"],
         lint: { "informative-dfn": false },
         maxTocLevel: 3,
         inlineCSS: true
@@ -260,9 +260,10 @@ The following terms are used to describe concepts in this specification.
       </p>
 
       <dl class="termlist definitions">
-        <dt><dfn class="export">NFC Host</dfn></dt>
+        <dt><dfn class="export">interaction offer</dfn></dt>
         <dd>
-An assertion made about a [=subject=].
+A protocol that [=issuers=], [=holders=], and [=verifiers=] use to determine
+the protocols over which an interaction can occur.
         </dd>
     </section>
 
@@ -303,16 +304,15 @@ An assertion made about a [=subject=].
 
     </section>
 
-    <section class="informative">
+    <section>
       <h2>Interaction Offers</h2>
 
       <p>
-An <dfn class="external lint-ignore">interaction offer</dfn> is a protocol that
-peers use to determine the protocols over which an interaction can occur.
-The protocol is composed of one peer providing an
-<dfn class="external">interaction offer URL</dfn> while the other peer fetches
-the <dfn class="external">interaction offer response</dfn>.
-An example of the [=interaction offer URL=] is provided below:
+An [=interaction offer=] is a protocol that peers use to determine the protocols
+over which an interaction can occur. The protocol is composed of one peer
+providing an <dfn class="external">interaction offer URL</dfn> while the other
+peer fetches the <dfn class="external">interaction offer response</dfn>. An
+example of the [=interaction offer URL=] is provided below:
       </p>
 
       <pre class="example" title="A simple interaction offer URL">
@@ -367,15 +367,269 @@ response is provided below:
 
     </section>
 
-
-    <section class="informative">
+    <section>
       <h2>NFC Protocol</h2>
 
       <p>
+The NFC protocol is used to wirelessly communicate between devices in a
+peer-to-peer fashion. It's range is typically limited to 10 centimeters or less
+based on the power levels used by the NFC device. The following sections
+describe how NFC can be used to request and receive verifiable credential
+presentations over NFC using the [[[WEB-NFC]]] specification.
       </p>
+
+      <section>
+        <h3>Non-interactive NFC Presentation</h3>
+
+        <p>
+Non-interactive NFC transmission of [=verifiable presentations=] are useful
+when the presentation of the information in a [=verifiable credential=] is
+enough to proceed with a workflow without needing to provide a challenge
+to the [=holder=] of the [=verifiable credential=] such as the use of a
+bearer token such as a public transit card or movie ticket.
+        </p>
+
+        <p>
+To perform such a [=presentation=], the [=holder=] is expected to use their
+device to select a [=verifiable credential=] for transmission and activate their
+device to transmit the information contained in `payload` value of the NFC
+`renderMethod` entry.
+        </p>
+
+        <p>
+For example, given the [=verifiable credential=] below:
+        </p>
+
+        <pre class="example" title="Verifiable Credential containing an NFC render method with a legacy payload">
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://www.w3.org/ns/credentials/examples/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "PublicTransportationTicket"
+  ],
+  "name": "Utopia Public Transport Ticket",
+  "description": "Utopia 30-day metro area subway and bus transportation ticket.",
+  "issuer": "did:key:zDnaeW9VZZs7NH1ykvS5EMFmdodu2wj4dPcrV3DzTAadrXJee",
+  "validFrom": "2024-08-03T12:19:52Z",
+  "validUntil": "2024-09-03T12:19:52Z",
+  "credentialSubject": {
+    "id": "did:example:b34ca6cd37bbf23",
+    "type": [
+      "Person",
+      "TicketedPassenger"
+    ],
+    "ticket": {
+      "type": "PublicTransportTicket",
+      "identifier": "83627465934729",
+      "modes": ["rail", "bus"],
+      "areaOfValidity": {
+        "locality": "Utopia"
+      }
+    }
+  },
+  "renderMethod": [{
+    "type": "NfcRenderingTemplate2024",
+    "name": "Present over NFC",
+    "payload": "uODM2Mjc0NjU5MzQ3Mjk"
+  }],
+  "proof": {
+    "type": "DataIntegrityProof",
+    "created": "2024-09-14T16:30:55Z",
+    "verificationMethod": "did:key:zDnaeW9VZZs7NH1ykvS5EMFmdodu2wj4dPcrV3DzTAadrXJee#zDnaeW9VZZs7NH1ykvS5EMFmdodu2wj4dPcrV3DzTAadrXJee"
+    "cryptosuite": "ecdsa-rdfc-2019",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "zxsiJdPoFZrEz...EZcBvBiE"
+}
+        </pre>
+
+        <p>
+Note that in the example above, the only information transmitted over NFC is
+the `credentialSubject.renderMethod.payload` value, which while unsigned,
+allows for the transmission of any legacy fixed NFC payload value.
+        </p>
+
+        <p>
+If an [=issuer=] desires to enable the transmission of a
+[=verifiable credential=] over NFC, they can encode one in the payload. Doing
+such an encoding can be made more efficient by compressing the
+[=verifiable credential=] using [[[CBOR-LD]]]. For example, the following
+[=verifiable credential=] contains an NFC payload that is a CBOR-LD encoded
+[=verifiable credential=]:
+        </p>
+
+        <pre class="example" title="Verifiable Credential containing an NFC render method with a CBOR-LD encoded verifiable credential payload">
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://w3id.org/citizenship/v2",
+    "https://www.w3.org/ns/credentials/examples/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "EmploymentAuthorizationDocumentCredential"
+  ],
+  "validFrom": "2019-12-03T12:19:52Z",
+  "validUntil": "2029-12-03T12:19:52Z",
+  "credentialSubject": {
+    "type": [
+      "Person",
+      "EmployablePerson"
+    ],
+    "givenName": "JOHN",
+    "additionalName": "JACOB",
+    "familyName": "SMITH",
+    "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhE...QmCC",
+    "gender": "Male",
+    "residentSince": "2015-01-01",
+    "birthCountry": "Bahamas",
+    "birthDate": "1999-07-17",
+    "employmentAuthorizationDocument": {
+      "type": "EmploymentAuthorizationDocument",
+      "identifier": "83627465",
+      "lprCategory": "C09",
+      "lprNumber": "999-999-999"
+    }
+  },
+  "name": "Employment Authorization Document",
+  "description": "Utopia Employment Authorization Document.",
+  "issuer": {
+    "id": "did:key:zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq",
+    "image": "data:image/png;base64,iVBORw0KGgoAA...CYII="
+  },
+  "renderMethod": [{
+    "name": "Landscape",
+    "mediaQuery": "@media (orientation: landscape)",
+    "type": "SvgRenderingTemplate2024",
+    "mediaType": "image/svg+xml",
+    "template": "&lt;svg ... svg&gt;"
+  },
+  {
+    "type": "NfcRenderingTemplate2024",
+    "payload": "u2QUBqgGCGCF4H2h0dHBzOi8vdzNpZC5vcmcvY2l0aXplbnNoaXAvdjIYgngyRXhhbXBsZSBDb3VudHJ5IEVtcGxveW1lbnQgQXV0aG9yaXphdGlvbiBEb2N1bWVudC4YjIICeDF2Y3BsYXlncm91bmQub3JnL2NyZWRlbnRpYWwvUm1PeEpTSzV1RGVraFJ4dDVDdGtGGJZ4IUVtcGxveW1lbnQgQXV0aG9yaXphdGlvbiBEb2N1bWVudBidghh2GK4YyKkYnYIYuhiqGN6kGJwYrBj-aDgzNjI3NDY1GQEAY0MwORkBAms5OTktOTk5LTk5ORjkajIwMTUtMDEtMDEY5mVKQUNPQhjoZ0JhaGFtYXMY6moxOTk5LTA3LTE3GOxlU01JVEgY7mRNYWxlGPBkSk9IThjMghkEAVgjgCQDgb9kmpNghWHHT98J7T5rZTGYiWGuqBhxLKToK1mFxzwYzqYYnBhsGQEIGmbZ10oZAQoBGQEUGQEaGQEWWEF6Q_oLxTGzWdBhyCNmHR2AyXtP1b7DCgXkn5XJyCvSfT2bJMQVtdclHllKQ9aHA-_EMqW8icm3di-7xh1JU92UsBkBGIMZBAFYI4AkA4G_ZJqTYIVhx0_fCe0-a2UxmIlhrqgYcSyk6CtZhcc8WCOAJAOBv2Sak2CFYcdP3wntPmtlMZiJYa6oGHEspOgrWYXHPBjYGl3mUugY2hpwtkpo"
+  }],
+  "proof": {
+    "type": "DataIntegrityProof",
+    "created": "2024-09-12T19:57:43Z",
+    "verificationMethod": "did:key:zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq#zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq",
+    "cryptosuite": "ecdsa-rdfc-2019",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3eWzCFM...rCjGrh"
+  }
+}
+        </pre>
+
+        <p>
+The payload above contains the following CBOR-LD data, which is a subset of
+the [=verifiable credential=] above without the large amounts of image data
+associated with the `issuer` and `image` properties:
+        </p>
+
+        <pre class="example" title="CBOR-LD payload in CBOR Diagnostic notation">
+1281({
+  // @context
+  1: [33, "https://w3id.org/citizenship/v2"],
+  // type
+  157: [118, 174],
+  // name
+  150: "Employment Authorization Document",
+  // description
+  130: "Utopia Employment Authorization Document.",
+  // validFrom
+  216: 1575375592,
+  // validUntil
+  218: 1890994792
+  // credentialSubject
+  200: {
+    157: [186, 170],
+    240: "JOHN"
+    230: "JACOB",
+    236: "SMITH",
+    238: "Male",
+    228: "2015-01-01",
+    232: "Bahamas",
+    234: "1999-07-17",
+    // employmentAuthorizationDocument
+    222: {
+      156: 172,
+      254: "83627465",
+      256: "C09",
+      258: "999-999-999"
+    },
+  },
+  // proof
+  206: {
+    156: 108,
+    264: 1725552458,
+    280: [1025,
+      h'80240381BF649A93608561C74FDF09ED3E6B6531988961AEA818712CA4E82B5985C73C',
+      h'80240381BF649A93608561C74FDF09ED3E6B6531988961AEA818712CA4E82B5985C73C'
+    ],
+    266: 1,
+    276: 282,
+    278: h'7A43FA0BC531B359D061C823661D1D80C97B4FD5BEC30A05E49F95C9C82BD27D3D9B24C415B5D7251E594A43D68703EFC432A5BC89C9B7762FBBC61D4953DD94B0'
+  },
+})
+        </pre>
+
+        <p>
+Which, when decoded to JSON-LD, provides the following
+[=verifiable credential=]:
+        </p>
+
+        <pre class="example" title="CBOR-LD payload as a JSON-LD verifiable credential">
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2",
+    "https://w3id.org/citizenship/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "EmploymentAuthorizationDocumentCredential"
+  ],
+  "validFrom": "2019-12-03T12:19:52Z",
+  "validUntil": "2029-12-03T12:19:52Z",
+  "credentialSubject": {
+    "type": [
+      "Person",
+      "EmployablePerson"
+    ],
+    "givenName": "JOHN",
+    "additionalName": "JACOB",
+    "familyName": "SMITH",
+    "gender": "Male",
+    "residentSince": "2015-01-01",
+    "birthCountry": "Bahamas",
+    "birthDate": "1999-07-17",
+    "employmentAuthorizationDocument": {
+      "type": "EmploymentAuthorizationDocument",
+      "identifier": "83627465",
+      "lprCategory": "C09",
+      "lprNumber": "999-999-999"
+    }
+  },
+  "name": "Employment Authorization Document",
+  "description": "Utopia Employment Authorization Document.",
+  "issuer": {
+    "id": "did:key:zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq",
+  },
+  "proof": {
+    "type": "DataIntegrityProof",
+    "created": "2024-09-12T19:57:43Z",
+    "verificationMethod": "did:key:zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq#zDnaerPmH7xAjZoWanUBkRzY6xi9aTywRRoyAaHyRAsAYHCRq",
+    "cryptosuite": "ecdsa-rdfc-2019",
+    "proofPurpose": "assertionMethod",
+    "proofValue": "z3eWzCFM...rCjGrh"
+  }
+}
+        </pre>
+
+      </section>
     </section>
 
-    <section class="informative">
+    <section>
       <h2>Bluetooth Protocol</h2>
 
       <p>
