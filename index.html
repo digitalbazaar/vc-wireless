@@ -235,10 +235,24 @@ Field Communication (NFC) and Bluetooth Low Energy (BLE).
         <h2>Use Cases</h2>
 
         <section>
+          <h3>Legacy Presentation</h3>
+
+          <p>
+The State of Utopia's digital transformation team would like to transition their
+vendors to use the [[[VC-DATA-MODEL-2.0]]] but would like to continue to support
+legacy systems using their proprietary NFC transit passes. They would like to
+instruct their new vendors to embed the legacy NFC transit pass codes into the
+new [=verifiable credentials=] that they will be issuing.
+          </p>
+        </section>
+
+        <section>
           <h3>Non-Interactive Presentation</h3>
 
           <p>
-
+Ricardo purchased a movie ticket online and would like to use his mobile
+device to present the digital ticket at the entry gate at the
+movie theatre.
           </p>
         </section>
 
@@ -246,7 +260,14 @@ Field Communication (NFC) and Bluetooth Low Energy (BLE).
           <h3>Interactive Presentation</h3>
 
           <p>
-
+Summer is crossing the border into Utopia and would like to use her new
+digital permanent resident card to speed her transit through the border
+crossing. In order to use the digital permanent resident card, border control
+challenges her devices to demonstrate that it is among the devices that
+Utopia resident services verified when they first issued the digital permanent
+resident card to Summer. This requires the border control software to send
+a cryptographic challenge to Summer's device, which it fulfils along with
+providing her permanent resident card, allowing Summer to cross the border.
           </p>
         </section>
 
@@ -254,7 +275,14 @@ Field Communication (NFC) and Bluetooth Low Energy (BLE).
           <h3>Wireless Protocol Upgrade</h3>
 
           <p>
-
+Ular is a digital notary in a rural area of their country and, after verifying
+the physical documents that Lora has provided, encodes digital images for each
+of them and includes them in a [=verifiable credential=] with Ular's digital
+signature. In order to transmit them to Lora, Ular needs a high bandwidth
+channel as data transmission over the mobile phone network is costly and slow
+in their area. Ular's software, which is configured to choose more cost
+effective options, choses to send the [=verifiable credential=] over a
+peer-to-peer short range wireless protocol.
           </p>
         </section>
 
@@ -262,7 +290,11 @@ Field Communication (NFC) and Bluetooth Low Energy (BLE).
           <h3>Optical Initiation</h3>
 
           <p>
-
+Mel would like to check out at a retail location which does not have any
+non-payment NFC technologies in their point of sale, but does support WiFi and
+Bluetooth at the store. Mel generates a QR Code and scans it at the point of
+sale to enable it to connect to their phone over Bluetooth to complete the
+transaction.
           </p>
         </section>
       </section>
