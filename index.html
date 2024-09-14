@@ -715,13 +715,131 @@ https://interaction.example/interactions/123/request?nfc
 
       </section>
 
+      <section>
+        <h3>Protocol Upgrades From NFC</h3>
+
+        <p>
+An application that desires to share a [=verifiable presentation=] might detect
+that continuing over an NFC channel will create a bad experience for the
+[=holder=] due to NFC limitations such as bandwidth, transmission distance, or
+latency. In these instances, when starting from an NFC-based [=interaction
+offer=], it is possible to upgrade to a more ideal transmission medium.
+        </p>
+
+        <p>
+In order to upgrade from NFC, an implementation merely does not include
+NFC options resulting in an [=interaction offer=] that looks similar to the
+following:
+        </p>
+
+        <pre class="example nohighlight" title="Example interaction offer upgrading from NFC to Bluetooth">
+
+<span class="comment">// holder transmits interaction offer URL to verifier over NFC</span>
+https://interaction.example/interactions/123/request?nfc
+
+<span class="comment">// verifier acquires interaction offer response over NFC</span>
+{
+  "protocols": {
+    <span class="comment">// holder forces an upgrade to Bluetooth</span>
+    "vcapi": "btspp://00:11:22:33:FF:EE:97c44c80-5fcc-11ef-81a2-bf5f90ac9110",
+  }
+}
+
+<span class="comment">// ... the rest of the workflow proceeds over Bluetooth</span>
+      </section>
+
     </section>
 
     <section>
       <h2>Bluetooth Protocol</h2>
 
       <p>
+The Bluetooth protocol is used to wirelessly communicate between devices in a
+peer-to-peer fashion. It's range is typically limited to 10 meters or less
+based on the power levels used by the Bluetooth device. The following sections
+describe how Bluetooth can be used to request and receive verifiable credential
+presentations over Bluetooth using the [[[WEB-BLUETOOTH]]] specification.
       </p>
+
+      <section>
+        <h3>Interactive Bluetooth Presentation</h3>
+
+        <p>
+Interactive [=presentation=] over Bluetooth is useful when a [=verifier=] needs to
+engage with a [=holder=] in a way that requires more than one message to be
+exchanged. Examples of this interaction pattern include a [=verifier=] providing
+a [=verifiable credential=] to the [=holder=] that demonstrates that the
+[=verifier=] has a legitimate need for the information that they are requesting.
+Another example using this interaction pattern is when the [=verifier=]
+desires to send a cryptographic challenge to the [=holder=] such that the
+[=holder=] can increase the confidence that the [=verifier=] has that the
+[=holder=] is the [=subject=] of the [=verifiable credential=] that has been
+requested.
+        </p>
+
+        <p>
+An interactive Bluetooth presentation starts with a [=interaction offer=] as
+described in Section [[[#interaction-offers]]] and then uses a [[[VC-API]]]
+workflow to perform the exchange. See
+<a href="https://w3c-ccg.github.io/vc-api/#workflows-and-exchanges">Workflows
+and Exchanges</a> in the [[[VC-API]]] for the specific messages exchanged
+between the Bluetooth peers to achieve an interactive presentation.
+        </p>
+
+        <p>
+An example interactive exchange is shown below for performing a DID-based
+authentication over Bluetooth.
+        </p>
+
+        <pre class="example nohighlight" title="Interactive Bluetooth exchange performing a DID-based authentication">
+
+<span class="comment">// holder transmits interaction offer URL to verifier over NFC or QR Code</span>
+https://interaction.example/interactions/123/request?bt=btspp%3A%2F%2F00%3A11%3A22%3A33%3AFF%3AEE%3A97c44c80-5fcc-11ef-81a2-bf5f90ac9110
+
+<span class="comment">// verifier acquires interaction offer response over Bluetooth</span>
+{
+  "protocols": {
+    "website": "https://website.example/interaction/123",
+    "vcapi": [
+      "nfc",
+      "btspp://00:11:22:33:FF:EE:97c44c80-5fcc-11ef-81a2-bf5f90ac9110",
+      "WIFI:S:38f2bcc5a0b71;T:WPA;P:J3Klq9c2KlPPcJkwzU02K;;",
+      "https://vcapi.example/workflows/z1A1FjMfnG/exchanges/z19mxakBFecZ",
+    ],
+    "otherRetailApi": "https://retail.example/checkout_api/763DAKX7diL5BFecZ"
+  }
+}
+
+<span class="comment">// verifier sends DIDAuthentication request over Bluetooth using VC API protocol</span>
+{
+  "query": [{
+    "type": "DIDAuthentication",
+    "acceptedMethods": [{"method": "example"}]
+  }],
+  "challenge": "99612b24-63d9-11ea-b99f-4f66f3e4f81a",
+  "domain": "interaction.example"
+}
+
+<span class="comment">// holder sends DIDAuthentication response over Bluetooth using VC API protocol</span>
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": "VerifiablePresentation",
+  "holder": "did:example:12345",
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-rdfc-2022",
+    "verificationMethod": "did:example:12345#key-1",
+    "challenge": "99612b24-63d9-11ea-b99f-4f66f3e4f81a",
+    "domain": "interaction.example",
+    "created": "2024-02-25T14:58:42Z",
+    "proofPurpose": "authentication",
+    "proofValue": "z3FXQjecWufY46...UAUL5n2Brbx"
+  }
+}
+        </pre>
+
+      </section>
+
     </section>
 
     <section class="informative">
