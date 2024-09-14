@@ -564,7 +564,9 @@ such an encoding can be made more efficient by compressing the
         <p>
 The payload above contains the following CBOR-LD data, which is a subset of
 the [=verifiable credential=] above without the large amounts of image data
-associated with the `issuer` and `image` properties:
+associated with the `issuer` and `image` properties. This results in a
+[=verifiable credential=] that is roughly 500 bytes in size and is thus
+easily transferred over NFC:
         </p>
 
         <pre class="example" title="CBOR-LD payload in CBOR Diagnostic notation">
@@ -615,8 +617,9 @@ associated with the `issuer` and `image` properties:
         </pre>
 
         <p>
-Which, when decoded to JSON-LD, provides the following
-[=verifiable credential=]:
+When the [=verifier=] receives the payload above, it decodes the CBOR-LD
+back into JSON-LD, providing the uncompressed [=verifiable credential=] to
+be further processed by the [=verifier=]:
         </p>
 
         <pre class="example" title="CBOR-LD payload as a JSON-LD verifiable credential">
