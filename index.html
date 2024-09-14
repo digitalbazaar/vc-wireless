@@ -48,6 +48,13 @@
             date: "July 15 2024",
             publisher: "JSON-LD Community Group",
             href: "https://json-ld.github.io/cbor-ld-spec/"
+          },
+          "VC-API": {
+            title: "Verifiable Credentials API",
+            authors: ["Dave Longley", "Manu Sporny"],
+            date: "August 25 2024",
+            publisher: "Credentials Community Group",
+            href: "https://w3c-ccg.github.io/vc-api/"
           }
         },
         doJsonLd: true,
@@ -627,6 +634,87 @@ Which, when decoded to JSON-LD, provides the following
         </pre>
 
       </section>
+
+      <section>
+        <h3>Interactive NFC Presentation</h3>
+
+        <p>
+Interactive [=presentation=] over NFC is useful when a [=verifier=] needs to
+engage with a [=holder=] in a way that requires more than one message to be
+exchanged. Examples of this interaction pattern include a [=verifier=] providing
+a [=verifiable credential=] to the [=holder=] that demonstrates that the
+[=verifier=] has a legitimate need for the information that they are requesting.
+Another example using this interaction pattern is when the [=verifier=]
+desires to send a cryptographic challenge to the [=holder=] such that the
+[=holder=] can increase the confidence that the [=verifier=] has that the
+[=holder=] is the [=subject=] of the [=verifiable credential=] that has been
+requested.
+        </p>
+
+        <p>
+An interactive NFC presentation starts with a [=interaction offer=] as
+described in Section [[[#interaction-offers]]] and then uses a [[[VC-API]]]
+workflow to perform the exchange. See
+<a href="https://w3c-ccg.github.io/vc-api/#workflows-and-exchanges">Workflows
+and Exchanges</a> in the [[[VC-API]]] for the specific messages exchanged
+between the NFC peers to achieve an interactive presentation.
+        </p>
+
+        <p>
+An example interactive exchange is shown below for performing a DID-based
+authentication over NFC.
+        </p>
+
+        <pre class="example nohighlight" title="Interactive NFC exchange performing a DID-based authentication">
+
+<span class="comment">// holder transmits interaction offer URL to verifier over NFC</span>
+https://interaction.example/interactions/123/request?nfc
+
+<span class="comment">// verifier acquires interaction offer response over NFC</span>
+{
+  "protocols": {
+    "website": "https://website.example/interaction/123",
+    "vcapi": [
+      "nfc",
+      "btspp://00:11:22:33:FF:EE:97c44c80-5fcc-11ef-81a2-bf5f90ac9110",
+      "WIFI:S:38f2bcc5a0b71;T:WPA;P:J3Klq9c2KlPPcJkwzU02K;;",
+      "https://vcapi.example/workflows/z1A1FjMfnG/exchanges/z19mxakBFecZ",
+    ],
+    "otherRetailApi": "https://retail.example/checkout_api/763DAKX7diL5BFecZ"
+  }
+}
+
+<span class="comment">// verifier sends DIDAuthentication request over NFC using VC API protocol</span>
+{
+  "query": [{
+    "type": "DIDAuthentication",
+    "acceptedMethods": [{"method": "example"}]
+  }],
+  "challenge": "99612b24-63d9-11ea-b99f-4f66f3e4f81a",
+  "domain": "interaction.example"
+}
+
+<span class="comment">// holder sends DIDAuthentication response over NFC using VC API protocol</span>
+{
+  "@context": ["https://www.w3.org/ns/credentials/v2"],
+  "type": "VerifiablePresentation",
+  "holder": "did:example:12345",
+  "proof": {
+    "type": "DataIntegrityProof",
+    "cryptosuite": "eddsa-rdfc-2022",
+    "verificationMethod": "did:example:12345#key-1",
+    "challenge": "99612b24-63d9-11ea-b99f-4f66f3e4f81a",
+    "domain": "interaction.example",
+    "created": "2024-02-25T14:58:42Z",
+    "proofPurpose": "authentication",
+    "proofValue": "z3FXQjecWufY46...UAUL5n2Brbx"
+  }
+}
+        </pre>
+
+
+      </section>
+
     </section>
 
     <section>
